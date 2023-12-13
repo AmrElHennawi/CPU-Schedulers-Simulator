@@ -29,7 +29,6 @@ public class SchedulerController {
 
         scheduler.processes = scheduler.getInput();
         scheduler.schedule();
-        scheduler.display();
         view.display(scheduler);
     }
 }
