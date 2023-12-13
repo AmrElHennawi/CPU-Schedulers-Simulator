@@ -61,7 +61,6 @@ class Process {
 
 }
 
-
 public abstract class  Scheduler {
     public List<Process> processes = new ArrayList<>();
      List<String> executionOrder = new ArrayList<>();
@@ -118,27 +117,14 @@ public abstract class  Scheduler {
         System.out.println(process.getProcessName() + ": " + process.getTurnaroundTime());
     }
     System.out.println("\nAverage Waiting Time: " + avgWaitingTime);
-    System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
-
-
-
-
-
- 
-    
+    System.out.println("Average Turnaround Time: " + avgTurnaroundTime); 
   }
-
-
   public int getNumProcesses() {
       return numProcesses;
   }
-
-
   public void setNumProcesses(int numProcesses) {
       this.numProcesses = numProcesses;
   }
-
-
 }
 
 class PriorityScheduler extends Scheduler{
@@ -184,7 +170,7 @@ class PriorityScheduler extends Scheduler{
                 int burstTime = scanner.nextInt();
                 System.out.print("Priority Number: ");
                 int priority = scanner.nextInt();
-                setNumProcesses(numProcesses);
+                this.setNumProcesses(numProcesses);
                 Process process = new Process(name, arrivalTime, burstTime, priority);
                 processes.add(process);
             }
