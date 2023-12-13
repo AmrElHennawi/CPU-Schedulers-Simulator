@@ -95,12 +95,20 @@ public abstract class  Scheduler {
   }
 
  // output the executionOrder
-  void PrintExecutionOrder(){
+  void display(){
     double avgWaitingTime = ClacAvgWaitingTime(processes,numProcesses);
     double avgTurnaroundTime = ClacAvgTurnaroundTime(processes, numProcesses);
 
     
     System.out.println("\nProcesses execution order: " + String.join(" -> ", executionOrder));
+       
+    System.out.println("\nProcesses     Arrival Time     Burst Time      Priority      Waiting Time     Turn Around Time");
+
+    for (Process process : processes) {
+
+        System.out.println(process.getProcessName() + "             " +process.getArrivalTime()+"             " + process.getBurstTime() + "              " + process.getPriorityNum()
+                    + "               " + process.getWaitingTime() + "               " + process.getTurnaroundTime());
+        }
     System.out.println("\nWaiting Time for each process:");
     for (Process process : processes) {
         System.out.println(process.getProcessName() + ": " + process.getWaitingTime());
@@ -111,6 +119,13 @@ public abstract class  Scheduler {
     }
     System.out.println("\nAverage Waiting Time: " + avgWaitingTime);
     System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
+
+
+
+
+
+ 
+    
   }
 
 
@@ -169,7 +184,7 @@ class PriorityScheduler extends Scheduler{
                 int burstTime = scanner.nextInt();
                 System.out.print("Priority Number: ");
                 int priority = scanner.nextInt();
-
+                setNumProcesses(numProcesses);
                 Process process = new Process(name, arrivalTime, burstTime, priority);
                 processes.add(process);
             }

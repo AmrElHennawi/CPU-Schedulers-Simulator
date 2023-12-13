@@ -37,7 +37,7 @@ public class SchedulerView {
            
             scheduler.processes= scheduler.getInput();
             scheduler.schedule();
-            scheduler.PrintExecutionOrder();
+            scheduler.display();
         }
     }
 }
