@@ -3,6 +3,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.PriorityQueue;
 
 class Process {
     private String processName;
@@ -85,7 +86,6 @@ public abstract class  Scheduler {
        double totalTurnaroundTime = 0;
 
       for (Process process : processes) {
-       
           totalTurnaroundTime += process.getTurnaroundTime();
       }
        double avgTurnaroundTime = totalTurnaroundTime / numProcesses;
@@ -183,14 +183,72 @@ class AGScheduler extends Scheduler{
 }
 class ShortestRemainingTimeFirstScheduler extends Scheduler{
 
+
     @Override
     public void schedule() {
-       
+        Collections.sort(processes, Comparator.comparingInt(Process::getArrivalTime));
+        PriorityQueue<Process> queue = new PriorityQueue<>(Comparator.comparingInt(Process::getPriorityNum).thenComparingInt(Process::getBurstTime).thenComparingInt(Process::getArrivalTime));
+
+        int currentTime = 0;
+        int index = 0;
+        int agingFactor = 10;
+
+        while (index < processes.size() || !queue.isEmpty()){
+            while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime){
+                queue.add(processes.get(index));
+                index++;
+            }
+            if(!queue.isEmpty()){
+                Process currentProcess = queue.poll();
+                currentProcess.setTurnaroundTime(currentTime - currentProcess.getArrivalTime());
+                currentProcess.setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getBurstTime());
+
+                for (Process process : queue){
+                    if (currentTime - process.getArrivalTime() > agingFactor){
+                        process.setPriorityNum(process.getPriorityNum() - 1);
+                    }
+                }
+
+                currentProcess.setBurstTime(currentProcess.getBurstTime() - 1);
+                currentTime++;
+
+
+                if (currentProcess.getBurstTime() == 0){
+                    executionOrder.add(currentProcess.getProcessName());
+                } else {
+                    queue.add(currentProcess);
+                }
+            } else {
+                currentTime++;
+            }
+        }
     }
 
     @Override
     public List<Process> getInput() {
-        return processes;
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter the number of processes: ");
+            int numProcesses = scanner.nextInt();
+
+            List<Process> processes = new ArrayList<>();
+
+            // Input parameters for each process
+            for (int i = 0; i < numProcesses; i++) {
+                System.out.println("Process " + (i + 1) + ":");
+                System.out.print("Name: ");
+                String name = scanner.next();
+                System.out.print("Arrival Time: ");
+                int arrivalTime = scanner.nextInt();
+                System.out.print("Burst Time: ");
+                int burstTime = scanner.nextInt();
+                System.out.print("Priority Number: ");
+                int priority = scanner.nextInt();
+                this.setNumProcesses(numProcesses);
+                Process process = new Process(name, arrivalTime, burstTime, priority);
+                processes.add(process);
+            }
+            return processes;
+        }
     }
-    
+
 }
