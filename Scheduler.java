@@ -463,16 +463,19 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler{
     @Override
     public void schedule() {
         Collections.sort(processes, Comparator.comparingInt(Process::getArrivalTime));
-        PriorityQueue<Process> queue = new PriorityQueue<>(Comparator.comparingDouble((Process p) -> p.getBurstTime() + p.getAge() / 10.0).thenComparingInt(Process::getArrivalTime));
+        // Create a priority queue to hold the processes, prioritizing the one with the shortest remaining burst time with the aging factor
+        PriorityQueue<Process> queue = new PriorityQueue<>(Comparator.comparingDouble((Process p) -> p.getBurstTime() - p.getAge() / 10.0).thenComparingInt(Process::getArrivalTime));
 
         int currentTime = 0;
         int index = 0;
 
         while (index < processes.size() || !queue.isEmpty()){
+            // Add processes to the queue based on arrival time
             while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime){
                 queue.add(processes.get(index));
                 index++;
             }
+            // If the queue is not empty, execute the process with the shortest remaining burst time
             if(!queue.isEmpty()){
                 Process currentProcess = queue.poll();
                 currentProcess.setBurstTime(currentProcess.getBurstTime() - 1);
@@ -482,6 +485,7 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler{
                     currentProcess.setTurnaroundTime(currentTime - currentProcess.getArrivalTime());
                     currentProcess.setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getOriginalBurstTime());
                     executionOrder.add(currentProcess.getProcessName());
+                    currentProcess.setAge(0);
                 } else {
                     queue.add(currentProcess);
                 }
@@ -489,7 +493,8 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler{
                 currentTime++;
             }
 
-            for(Process process : processes){
+            // Increase the age of all processes in the queue
+            for(Process process : queue){
                 process.setAge(process.getAge() + 1);
             }
         }
