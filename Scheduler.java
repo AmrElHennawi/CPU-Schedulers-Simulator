@@ -16,6 +16,7 @@ class Process {
     private int priorityNum;
     private int quantum = 0;
     private int agFactor = 0;
+    private int age;
     private int waitingTime; // don't put it in the constructor
     private int turnaroundTime; // don't put it in the constructor
 
@@ -25,6 +26,7 @@ class Process {
         this.burstTime = burstTime;
         this.originalBurstTime = burstTime;
         this.priorityNum = priorityNum;
+        this.age = 0;
     }
 
     public void setProcessName(String processName) {
@@ -102,6 +104,12 @@ class Process {
     public void setAgFactor(int n)
     {
         this.agFactor = n;
+    }
+    public void setAge(int age){
+        this.age = age;
+    }
+    public int getAge(){
+        return age;
     }
 
 }
@@ -449,37 +457,40 @@ class AGScheduler extends Scheduler {
 
 }
 
-class ShortestRemainingTimeFirstScheduler extends Scheduler {
+class ShortestRemainingTimeFirstScheduler extends Scheduler{
+
 
     @Override
     public void schedule() {
         Collections.sort(processes, Comparator.comparingInt(Process::getArrivalTime));
-        PriorityQueue<Process> queue = new PriorityQueue<>(
-                Comparator.comparingInt(Process::getBurstTime).thenComparingInt(Process::getArrivalTime));
+        PriorityQueue<Process> queue = new PriorityQueue<>(Comparator.comparingDouble((Process p) -> p.getBurstTime() + p.getAge() / 10.0).thenComparingInt(Process::getArrivalTime));
 
         int currentTime = 0;
         int index = 0;
 
-        while (index < processes.size() || !queue.isEmpty()) {
-            while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime) {
+        while (index < processes.size() || !queue.isEmpty()){
+            while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime){
                 queue.add(processes.get(index));
                 index++;
             }
-            if (!queue.isEmpty()) {
+            if(!queue.isEmpty()){
                 Process currentProcess = queue.poll();
                 currentProcess.setBurstTime(currentProcess.getBurstTime() - 1);
                 currentTime++;
 
-                if (currentProcess.getBurstTime() == 0) {
+                if (currentProcess.getBurstTime() == 0){
                     currentProcess.setTurnaroundTime(currentTime - currentProcess.getArrivalTime());
-                    currentProcess
-                            .setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getOriginalBurstTime());
+                    currentProcess.setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getOriginalBurstTime());
                     executionOrder.add(currentProcess.getProcessName());
                 } else {
                     queue.add(currentProcess);
                 }
             } else {
                 currentTime++;
+            }
+
+            for(Process process : processes){
+                process.setAge(process.getAge() + 1);
             }
         }
     }
@@ -503,7 +514,6 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler {
                 int burstTime = scanner.nextInt();
                 this.setNumProcesses(numProcesses);
                 Process process = new Process(name, arrivalTime, burstTime, 0);
-
                 processes.add(process);
             }
             return processes;
