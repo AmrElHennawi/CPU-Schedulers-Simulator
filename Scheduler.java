@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.PriorityQueue;
+//import math library
+import java.lang.Math;
 
 class Process {
     private String processName;
@@ -12,6 +14,8 @@ class Process {
     private int burstTime;
     private int originalBurstTime;
     private int priorityNum;
+    private int quantum = 0;
+    private int agFactor = 0;
     private int waitingTime; // don't put it in the constructor
     private int turnaroundTime; // don't put it in the constructor
 
@@ -84,6 +88,20 @@ class Process {
 
     public int getAGFactor() {
         return 0;
+    }
+    public int getQuantum(){
+        return quantum;
+    }
+    public void setQuantum(int n)
+    {
+        this.quantum = n;
+    }
+    public int getAgFactor(){
+        return agFactor;
+    }
+    public void setAgFactor(int n)
+    {
+        this.agFactor = n;
     }
 
 }
@@ -235,78 +253,141 @@ class SJFScheduler extends Scheduler {
 
 }
 
+//class AGScheduler extends Scheduler {
+//
+//    @Override
+//    public void schedule() {
+//        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getAGFactor));
+//        List<Process> dieList = new ArrayList<>();
+//
+//        int currentTime = 0;
+//        int quantumTime = 4; // Initial quantum time for each process
+//
+//        while (!processes.isEmpty() || !readyQueue.isEmpty()) {
+//            // Add processes to the ready queue based on arrival time
+//            while (!processes.isEmpty() && processes.get(0).getArrivalTime() <= currentTime) {
+//                Process process = processes.remove(0);
+//                process.setAGFactor(calculateAGFactor(process));
+//                readyQueue.add(process);
+//            }
+//
+//            if (!readyQueue.isEmpty()) {
+//                Process runningProcess = readyQueue.poll();
+//
+//                int remainingQuantumTime = quantumTime;
+//                if (runningProcess.isPreemptive()) {
+//                    // Non-preemptive AG till ceil(50%) of Quantum time
+//                    remainingQuantumTime = (int) Math.ceil(0.5 * quantumTime);
+//                }
+//
+//                while (remainingQuantumTime > 0 && runningProcess.getBurstTime() > 0) {
+//                    runningProcess.setBurstTime(runningProcess.getBurstTime() - 1);
+//                    currentTime++;
+//                    remainingQuantumTime--;
+//
+//                    if (runningProcess.isPreemptive() && remainingQuantumTime == 0) {
+//                        readyQueue.add(runningProcess); // Add to the end of the queue
+//                        quantumTime += (int) Math.ceil(0.1 * quantumTime); // Increase Quantum time
+//                    }
+//                }
+//
+//                if (runningProcess.getBurstTime() > 0) {
+//                    // Process didn't finish its job
+//                    readyQueue.add(runningProcess);
+//                    quantumTime += (int) Math.ceil(0.1 * quantumTime); // Increase Quantum time
+//                } else {
+//                    // Process finished its job
+//                    dieList.add(runningProcess);
+//                }
+//            } else {
+//                // No process in the ready queue, just increment time
+//                currentTime++;
+//            }
+//        }
+//
+//        executionOrder.addAll(dieList.stream().map(Process::getProcessName).collect(Collectors.toList()));
+//    }
+//
+//    // Calculate AG-Factor based on the specified conditions
+//    private int calculateAGFactor(Process process) {
+//        int randomFunction = getRandomFunction();
+//        int priorityOrTenOrRandom = Math.max(process.getPriorityNum(), Math.max(10, randomFunction));
+//        return priorityOrTenOrRandom + process.getArrivalTime() + process.getBurstTime();
+//    }
+//
+//    // Generate random number between 0 and 20
+//    private int getRandomFunction() {
+//        return (int) (Math.random() * 21);
+//    }
+//
+//    @Override
+//    public List<Process> getInput() {
+//        return processes;
+//        // Input code remains unchanged
+//    }
+//}
+
 class AGScheduler extends Scheduler {
 
     @Override
-    public void schedule() {
-        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getAGFactor));
-        List<Process> dieList = new ArrayList<>();
+    public  void schedule(){
+        List<Process> processes = getInput();
+        processes = getInput();
+        
+    }
+    @Override
+    public  List<Process> getInput(){
+        try (Scanner scanner = new Scanner(System.in)) {
 
-        int currentTime = 0;
-        int quantumTime = 4; // Initial quantum time for each process
+            System.out.println("Enter the number of processes: ");
+            int numProcesses = scanner.nextInt();
+            List<Process> processes = new ArrayList<>();
 
-        while (!processes.isEmpty() || !readyQueue.isEmpty()) {
-            // Add processes to the ready queue based on arrival time
-            while (!processes.isEmpty() && processes.get(0).getArrivalTime() <= currentTime) {
-                Process process = processes.remove(0);
-                process.setAGFactor(calculateAGFactor(process));
-                readyQueue.add(process);
-            }
+            System.out.println("Enter the Round Robin Time Quantum: ");
+            int quantumTime = scanner.nextInt();
+            for(int i = 0; i < numProcesses ;i++)
+            {
+                System.out.println("Process " + (i + 1) + ":");
+                System.out.print("Name: ");
+                String name = scanner.next();
 
-            if (!readyQueue.isEmpty()) {
-                Process runningProcess = readyQueue.poll();
+                System.out.print("Arrival Time: ");
+                int arrivalTime = scanner.nextInt();
 
-                int remainingQuantumTime = quantumTime;
-                if (runningProcess.isPreemptive()) {
-                    // Non-preemptive AG till ceil(50%) of Quantum time
-                    remainingQuantumTime = (int) Math.ceil(0.5 * quantumTime);
-                }
+                System.out.print("Burst Time: ");
+                int burstTime = scanner.nextInt();
 
-                while (remainingQuantumTime > 0 && runningProcess.getBurstTime() > 0) {
-                    runningProcess.setBurstTime(runningProcess.getBurstTime() - 1);
-                    currentTime++;
-                    remainingQuantumTime--;
+                System.out.print("Priority Number: ");
+                int priority = scanner.nextInt();
+                this.setNumProcesses(numProcesses);
 
-                    if (runningProcess.isPreemptive() && remainingQuantumTime == 0) {
-                        readyQueue.add(runningProcess); // Add to the end of the queue
-                        quantumTime += (int) Math.ceil(0.1 * quantumTime); // Increase Quantum time
-                    }
-                }
+                int agFactor = SetAgFactor(priority,burstTime,arrivalTime);
 
-                if (runningProcess.getBurstTime() > 0) {
-                    // Process didn't finish its job
-                    readyQueue.add(runningProcess);
-                    quantumTime += (int) Math.ceil(0.1 * quantumTime); // Increase Quantum time
-                } else {
-                    // Process finished its job
-                    dieList.add(runningProcess);
-                }
-            } else {
-                // No process in the ready queue, just increment time
-                currentTime++;
+                Process process = new Process(name, arrivalTime, burstTime, priority);
+
+                process.setQuantum(quantumTime);
+                process.setAGFactor(agFactor);
+                processes.add(process);
             }
         }
-
-        executionOrder.addAll(dieList.stream().map(Process::getProcessName).collect(Collectors.toList()));
-    }
-
-    // Calculate AG-Factor based on the specified conditions
-    private int calculateAGFactor(Process process) {
-        int randomFunction = getRandomFunction();
-        int priorityOrTenOrRandom = Math.max(process.getPriorityNum(), Math.max(10, randomFunction));
-        return priorityOrTenOrRandom + process.getArrivalTime() + process.getBurstTime();
-    }
-
-    // Generate random number between 0 and 20
-    private int getRandomFunction() {
-        return (int) (Math.random() * 21);
-    }
-
-    @Override
-    public List<Process> getInput() {
         return processes;
-        // Input code remains unchanged
     }
+
+    private int SetAgFactor(int priority, int burstTime, int arrivalTime)
+    {
+        int factor;
+        int randomNum = ((int)Math.random() * 21);;
+        if(randomNum < 10)
+            factor = randomNum + burstTime + arrivalTime;
+        else if(randomNum == 10)
+            factor = priority + burstTime + arrivalTime;
+        else
+            factor = 10 + arrivalTime + burstTime;
+
+        return factor;
+
+    }
+
 }
 
 class ShortestRemainingTimeFirstScheduler extends Scheduler {
@@ -363,6 +444,7 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler {
                 int burstTime = scanner.nextInt();
                 this.setNumProcesses(numProcesses);
                 Process process = new Process(name, arrivalTime, burstTime, 0);
+
                 processes.add(process);
             }
             return processes;
