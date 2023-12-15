@@ -86,24 +86,28 @@ class Process {
     public int getAGFactor() {
         return 0;
     }
-    public int getQuantum(){
+
+    public int getQuantum() {
         return quantum;
     }
-    public void setQuantum(int n)
-    {
+
+    public void setQuantum(int n) {
         this.quantum = n;
     }
-    public int getAgFactor(){
+
+    public int getAgFactor() {
         return agFactor;
     }
-    public void setAgFactor(int n)
-    {
+
+    public void setAgFactor(int n) {
         this.agFactor = n;
     }
-    public void setAge(int age){
+
+    public void setAge(int age) {
         this.age = age;
     }
-    public int getAge(){
+
+    public int getAge() {
         return age;
     }
 
@@ -161,31 +165,31 @@ class PriorityScheduler extends Scheduler {
 
         int end = processes.get(0).getArrivalTime();
 
-        //this loop should sort the processes to the final order they will be executed on
-        //current
-        for(int i = 0; i < processes.size()-1;i++){
+        // this loop should sort the processes to the final order they will be executed
+        // on
+        // current
+        for (int i = 0; i < processes.size() - 1; i++) {
             int start;
-            if(processes.get(i).getArrivalTime() <= end){
+            if (processes.get(i).getArrivalTime() <= end) {
                 start = end;
-            }
-            else{
+            } else {
                 start = processes.get(i).getArrivalTime();
             }
 
             end = start + processes.get(i).getBurstTime();
-            int minIndex = i+1;
+            int minIndex = i + 1;
 
-            //search next
-            for(int j = i+1; j < processes.size(); j++){
-                if((processes.get(j).getArrivalTime() < start) ||
-                        (processes.get(j).getArrivalTime() >= start && processes.get(j).getArrivalTime() < end)){
-                    if(processes.get(j).getPriorityNum() < processes.get(minIndex).getPriorityNum()){
+            // search next
+            for (int j = i + 1; j < processes.size(); j++) {
+                if ((processes.get(j).getArrivalTime() < start) ||
+                        (processes.get(j).getArrivalTime() >= start && processes.get(j).getArrivalTime() < end)) {
+                    if (processes.get(j).getPriorityNum() < processes.get(minIndex).getPriorityNum()) {
                         minIndex = j;
                     }
                 }
             }
 
-            Collections.swap(processes,i+1,minIndex);
+            Collections.swap(processes, i + 1, minIndex);
         }
 
         int currentTime = 0;
@@ -241,34 +245,33 @@ class SJFScheduler extends Scheduler {
         Collections.sort(processes,
                 Comparator.comparingInt((Process p) -> p.getArrivalTime()).thenComparingInt(p -> p.getBurstTime()));
 
-
         int end = processes.get(0).getArrivalTime();
 
-        //this loop should sort the processes to the final order they will be executed on
-        //current
-        for(int i = 0; i < processes.size()-1;i++){
+        // this loop should sort the processes to the final order they will be executed
+        // on
+        // current
+        for (int i = 0; i < processes.size() - 1; i++) {
             int start;
-            if(processes.get(i).getArrivalTime() <= end){
+            if (processes.get(i).getArrivalTime() <= end) {
                 start = end;
-            }
-            else{
+            } else {
                 start = processes.get(i).getArrivalTime();
             }
 
             end = start + processes.get(i).getBurstTime();
-            int minIndex = i+1;
+            int minIndex = i + 1;
 
-            //search next
-            for(int j = i+1; j < processes.size(); j++){
-                if((processes.get(j).getArrivalTime() < start) ||
-                        (processes.get(j).getArrivalTime() >= start && processes.get(j).getArrivalTime() < end)){
-                    if(processes.get(j).getBurstTime() < processes.get(minIndex).getBurstTime()){
+            // search next
+            for (int j = i + 1; j < processes.size(); j++) {
+                if ((processes.get(j).getArrivalTime() < start) ||
+                        (processes.get(j).getArrivalTime() >= start && processes.get(j).getArrivalTime() < end)) {
+                    if (processes.get(j).getBurstTime() < processes.get(minIndex).getBurstTime()) {
                         minIndex = j;
                     }
                 }
             }
 
-            Collections.swap(processes,i+1,minIndex);
+            Collections.swap(processes, i + 1, minIndex);
         }
 
         int currentTime = 0;
@@ -315,108 +318,99 @@ class SJFScheduler extends Scheduler {
 
 }
 
-
 class AGScheduler extends Scheduler {
 
     @Override
-    public  void schedule(){
+    public void schedule() {
 
         List<Process> dieList = new ArrayList<>();
         List<Process> currrentProcess = new ArrayList<>();
         Queue<Process> q = new LinkedList<>();
         int time = 0;
-        while(dieList.size()<processes.size())
-        {
+        while (dieList.size() < processes.size()) {
             int currentTime = 0;
-            updateCurrentProcess(processes,currrentProcess,dieList,time);
-            updateReadyQueue(currrentProcess,q,dieList);
+            updateCurrentProcess(processes, currrentProcess, dieList, time);
+            updateReadyQueue(currrentProcess, q, dieList);
 
-            int nonPreemptTime = (int)Math.ceil(q.peek().getQuantum() / 2.0);
-            int preemptTime = q.peek().getQuantum()-nonPreemptTime;
+            int nonPreemptTime = (int) Math.ceil(q.peek().getQuantum() / 2.0);
+            int preemptTime = q.peek().getQuantum() - nonPreemptTime;
 
             time += nonPreemptTime;
 
             q.peek().setBurstTime(q.peek().getBurstTime() - nonPreemptTime);
 
             executionOrder.add(q.peek().getProcessName());
-            check(q,dieList,time);
+            check(q, dieList, time);
 
-            updateCurrentProcess(processes,currrentProcess,dieList,time);
-            updateReadyQueue(currrentProcess,q,dieList);
+            updateCurrentProcess(processes, currrentProcess, dieList, time);
+            updateReadyQueue(currrentProcess, q, dieList);
 
-            for(int i = 1; i <= preemptTime;i++)
-            {
-                time+=1;
+            for (int i = 1; i <= preemptTime; i++) {
+                time += 1;
                 q.peek().setBurstTime(q.peek().getBurstTime() - 1);
 
                 boolean interrupted = false;
 
-                if(q.peek().getBurstTime()==0) {
+                if (q.peek().getBurstTime() == 0) {
                     q.peek().setQuantum(0);
                     q.peek().setTurnaroundTime(time - q.peek().getArrivalTime());
                     dieList.add(q.peek());
                     q.remove();
 
                     break;
-                }
-                else if(i == preemptTime && q.peek().getBurstTime()>0)
-                {
+                } else if (i == preemptTime && q.peek().getBurstTime() > 0) {
                     double mean = 0;
-                    for(int j = 0; j < currrentProcess.size();j++)
-                    {
+                    for (int j = 0; j < currrentProcess.size(); j++) {
                         mean += currrentProcess.get(j).getQuantum();
                     }
                     mean = mean / currrentProcess.size();
-                    mean = Math.ceil( mean * 0.1);
+                    mean = Math.ceil(mean * 0.1);
 
-                    q.peek().setQuantum(q.peek().getQuantum()+ (int) mean);
+                    q.peek().setQuantum(q.peek().getQuantum() + (int) mean);
                     q.add(q.peek());
                     q.remove();
 
-//                    if(!q.isEmpty())
-//                        executionOrder.add(q.peek().getProcessName());
+                    // if(!q.isEmpty())
+                    // executionOrder.add(q.peek().getProcessName());
                     break;
                 }
 
-                updateCurrentProcess(processes,currrentProcess,dieList,time);
-                updateReadyQueue(currrentProcess,q,dieList);
+                updateCurrentProcess(processes, currrentProcess, dieList, time);
+                updateReadyQueue(currrentProcess, q, dieList);
 
-                for(int j = 0; j < currrentProcess.size();j++)
-                {
-                    if(currrentProcess.get(j).getAGFactor()<q.peek().getAGFactor())
-                    {
-                        q.peek().setQuantum(q.peek().getQuantum()+(q.peek().getQuantum() - nonPreemptTime - i));
+                for (int j = 0; j < currrentProcess.size(); j++) {
+                    if (currrentProcess.get(j).getAGFactor() < q.peek().getAGFactor()) {
+                        q.peek().setQuantum(q.peek().getQuantum() + (q.peek().getQuantum() - nonPreemptTime - i));
                         q.add(q.peek());
                         q.remove();
-//                        if(!q.isEmpty())
-//                            executionOrder.add(q.peek().getProcessName());
+                        // if(!q.isEmpty())
+                        // executionOrder.add(q.peek().getProcessName());
                         interrupted = true;
                         break;
                     }
                 }
-                if(interrupted)
+                if (interrupted)
                     break;
 
-                if(check(q,dieList,time))
+                if (check(q, dieList, time))
                     break;
             }
-            check(q,dieList,time);
+            check(q, dieList, time);
 
         }
 
-
     }
-    private boolean check( Queue<Process> q,List<Process> dieList,int time)
-    {
-        if(!q.isEmpty())
-        {
-            if(q.peek().getBurstTime()<=0) {
+
+    private boolean check(Queue<Process> q, List<Process> dieList, int time) {
+        if (!q.isEmpty()) {
+            if (q.peek().getBurstTime() <= 0) {
                 q.peek().setQuantum(0);
                 q.peek().setTurnaroundTime(time - q.peek().getArrivalTime());
+                q.peek().setWaitingTime(q.peek().getTurnaroundTime() - q.peek().getOriginalBurstTime());
                 dieList.add(q.peek());
                 q.remove();
-//                if(!q.isEmpty())
-//                    executionOrder.add(q.peek().getProcessName());
+                // if(!q.isEmpty())
+                // executionOrder.add(q.peek().getProcessName());
                 return true;
             }
         }
@@ -424,24 +418,25 @@ class AGScheduler extends Scheduler {
         return false;
     }
 
-    private void updateCurrentProcess(List<Process> processes,List<Process> currrentProcess, List<Process> dieList,int time )
-    {
-        for(int i = 0; i < processes.size();i++){ // to be optimized
-            if(!dieList.contains(processes.get(i)) && !currrentProcess.contains(processes.get(i)) && time >= processes.get(i).getArrivalTime()  )
+    private void updateCurrentProcess(List<Process> processes, List<Process> currrentProcess, List<Process> dieList,
+            int time) {
+        for (int i = 0; i < processes.size(); i++) { // to be optimized
+            if (!dieList.contains(processes.get(i)) && !currrentProcess.contains(processes.get(i))
+                    && time >= processes.get(i).getArrivalTime())
                 currrentProcess.add(processes.get(i));
         }
         Collections.sort(currrentProcess, Comparator.comparingInt(Process::getAgFactor));
     }
-    private void updateReadyQueue(List<Process> currrentProcess, Queue<Process> q,List<Process> dieList)
-    {
-        for(int i = 0; i < currrentProcess.size();i++)
-        {
-            if(!q.contains(currrentProcess.get(i)) && !dieList.contains(currrentProcess.get(i)))
+
+    private void updateReadyQueue(List<Process> currrentProcess, Queue<Process> q, List<Process> dieList) {
+        for (int i = 0; i < currrentProcess.size(); i++) {
+            if (!q.contains(currrentProcess.get(i)) && !dieList.contains(currrentProcess.get(i)))
                 q.add(currrentProcess.get(i));
         }
     }
+
     @Override
-    public  List<Process> getInput(){
+    public List<Process> getInput() {
         try (Scanner scanner = new Scanner(System.in)) {
 
             System.out.println("Enter the number of processes: ");
@@ -451,8 +446,7 @@ class AGScheduler extends Scheduler {
             int quantumTime = scanner.nextInt();
 
             List<Process> processes = new ArrayList<>();
-            for(int i = 0; i < numProcesses ;i++)
-            {
+            for (int i = 0; i < numProcesses; i++) {
                 System.out.println("Process " + (i + 1) + ":");
                 System.out.print("Name: ");
                 String name = scanner.next();
@@ -467,7 +461,7 @@ class AGScheduler extends Scheduler {
                 int priority = scanner.nextInt();
                 this.setNumProcesses(numProcesses);
 
-                int agFactor = getAgFactor(priority,burstTime,arrivalTime);
+                int agFactor = getAgFactor(priority, burstTime, arrivalTime);
 
                 Process process = new Process(name, arrivalTime, burstTime, priority);
 
@@ -484,9 +478,9 @@ class AGScheduler extends Scheduler {
         int factor;
         int randomNum = (int) (Math.random() * 21);
 
-        if(randomNum < 10)
+        if (randomNum < 10)
             factor = randomNum + burstTime + arrivalTime;
-        else if(randomNum == 10)
+        else if (randomNum == 10)
             factor = priority + burstTime + arrivalTime;
         else
             factor = 10 + arrivalTime + burstTime;
@@ -497,33 +491,37 @@ class AGScheduler extends Scheduler {
 
 }
 
-class ShortestRemainingTimeFirstScheduler extends Scheduler{
-
+class ShortestRemainingTimeFirstScheduler extends Scheduler {
 
     @Override
     public void schedule() {
         Collections.sort(processes, Comparator.comparingInt(Process::getArrivalTime));
-        // Create a priority queue to hold the processes, prioritizing the one with the shortest remaining burst time with the aging factor
-        PriorityQueue<Process> queue = new PriorityQueue<>(Comparator.comparingDouble((Process p) -> p.getBurstTime() - p.getAge() / 10.0).thenComparingInt(Process::getArrivalTime));
+        // Create a priority queue to hold the processes, prioritizing the one with the
+        // shortest remaining burst time with the aging factor
+        PriorityQueue<Process> queue = new PriorityQueue<>(
+                Comparator.comparingDouble((Process p) -> p.getBurstTime() - p.getAge() / 10.0)
+                        .thenComparingInt(Process::getArrivalTime));
 
         int currentTime = 0;
         int index = 0;
 
-        while (index < processes.size() || !queue.isEmpty()){
+        while (index < processes.size() || !queue.isEmpty()) {
             // Add processes to the queue based on arrival time
-            while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime){
+            while (index < processes.size() && processes.get(index).getArrivalTime() <= currentTime) {
                 queue.add(processes.get(index));
                 index++;
             }
-            // If the queue is not empty, execute the process with the shortest remaining burst time
-            if(!queue.isEmpty()){
+            // If the queue is not empty, execute the process with the shortest remaining
+            // burst time
+            if (!queue.isEmpty()) {
                 Process currentProcess = queue.poll();
                 currentProcess.setBurstTime(currentProcess.getBurstTime() - 1);
                 currentTime++;
 
-                if (currentProcess.getBurstTime() == 0){
+                if (currentProcess.getBurstTime() == 0) {
                     currentProcess.setTurnaroundTime(currentTime - currentProcess.getArrivalTime());
-                    currentProcess.setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getOriginalBurstTime());
+                    currentProcess
+                            .setWaitingTime(currentProcess.getTurnaroundTime() - currentProcess.getOriginalBurstTime());
                     executionOrder.add(currentProcess.getProcessName());
                     currentProcess.setAge(0);
                 } else {
@@ -534,7 +532,7 @@ class ShortestRemainingTimeFirstScheduler extends Scheduler{
             }
 
             // Increase the age of all processes in the queue
-            for(Process process : queue){
+            for (Process process : queue) {
                 process.setAge(process.getAge() + 1);
             }
         }
