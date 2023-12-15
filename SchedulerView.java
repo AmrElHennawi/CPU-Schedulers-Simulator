@@ -26,7 +26,7 @@ public class SchedulerView {
         System.out.println("\nProcesses     Arrival Time     Burst Time      Priority      Waiting Time     Turn Around Time");
 
         for (Process process : scheduler.processes) {
-            System.out.println(process.getProcessName() + "             " +process.getArrivalTime()+"             " + process.getBurstTime() + "              " + process.getPriorityNum()
+            System.out.println(process.getProcessName() + "             " +process.getArrivalTime()+"             " + process.getOriginalBurstTime() + "              " + process.getPriorityNum()
                         + "               " + process.getWaitingTime() + "               " + process.getTurnaroundTime());
         }
         System.out.println("\nWaiting Time for each process:");
