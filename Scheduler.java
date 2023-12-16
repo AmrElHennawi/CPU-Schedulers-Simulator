@@ -239,6 +239,8 @@ class PriorityScheduler extends Scheduler {
 
 class SJFScheduler extends Scheduler {
 
+    private int contextSwitch;
+
     @Override
     public void schedule() {
         // Sort processes based on burst time then the arrival time
@@ -285,7 +287,7 @@ class SJFScheduler extends Scheduler {
             process.setWaitingTime(currentTime - process.getArrivalTime());
             process.setTurnaroundTime(process.getWaitingTime() + process.getBurstTime());
 
-            currentTime += process.getBurstTime();
+            currentTime += process.getBurstTime()+contextSwitch;
             executionOrder.add(process.getProcessName());
         }
 
@@ -296,6 +298,9 @@ class SJFScheduler extends Scheduler {
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.print("Enter the number of processes: ");
             int numProcesses = scanner.nextInt();
+            System.out.print("Enter the Context Switch Value: ");
+            int contextSwitchInput = scanner.nextInt();
+            contextSwitch = contextSwitchInput;
 
             List<Process> processes = new ArrayList<>();
 
