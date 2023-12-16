@@ -335,12 +335,16 @@ class AGScheduler extends Scheduler {
             int nonPreemptTime = (int) Math.ceil(q.peek().getQuantum() / 2.0);
             int preemptTime = q.peek().getQuantum() - nonPreemptTime;
 
-            time += nonPreemptTime;
-
-            q.peek().setBurstTime(q.peek().getBurstTime() - nonPreemptTime);
+            while(q.peek().getBurstTime()>0 && nonPreemptTime>0) {
+                time+=1;
+                q.peek().setBurstTime(q.peek().getBurstTime() - 1);
+                nonPreemptTime--;
+            }
 
             executionOrder.add(q.peek().getProcessName());
-            check(q, dieList, time);
+
+            if(check(q, dieList, time, currrentProcess))
+                continue;
 
             updateCurrentProcess(processes, currrentProcess, dieList, time);
             updateReadyQueue(currrentProcess, q, dieList);
@@ -368,10 +372,9 @@ class AGScheduler extends Scheduler {
 
                     q.peek().setQuantum(q.peek().getQuantum() + (int) mean);
                     q.add(q.peek());
+                    currrentProcess.remove(q.peek());
                     q.remove();
 
-                    // if(!q.isEmpty())
-                    // executionOrder.add(q.peek().getProcessName());
                     break;
                 }
 
@@ -383,8 +386,6 @@ class AGScheduler extends Scheduler {
                         q.peek().setQuantum(q.peek().getQuantum() + (q.peek().getQuantum() - nonPreemptTime - i));
                         q.add(q.peek());
                         q.remove();
-                        // if(!q.isEmpty())
-                        // executionOrder.add(q.peek().getProcessName());
                         interrupted = true;
                         break;
                     }
@@ -392,22 +393,23 @@ class AGScheduler extends Scheduler {
                 if (interrupted)
                     break;
 
-                if (check(q, dieList, time))
+                if (check(q, dieList, time,currrentProcess))
                     break;
             }
-            check(q, dieList, time);
+            check(q, dieList, time,currrentProcess);
 
         }
 
     }
 
-    private boolean check(Queue<Process> q, List<Process> dieList, int time) {
+    private boolean check(Queue<Process> q, List<Process> dieList, int time,List<Process> currrentProcess) {
         if (!q.isEmpty()) {
             if (q.peek().getBurstTime() <= 0) {
                 q.peek().setQuantum(0);
                 q.peek().setTurnaroundTime(time - q.peek().getArrivalTime());
                 q.peek().setWaitingTime(q.peek().getTurnaroundTime() - q.peek().getOriginalBurstTime());
                 dieList.add(q.peek());
+                currrentProcess.remove(q.peek());
                 q.remove();
                 // if(!q.isEmpty())
                 // executionOrder.add(q.peek().getProcessName());
